@@ -1,0 +1,92 @@
+package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import android.graphics.Color;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+
+/**
+ * Created by Atalanta on 12/13/2015.
+ */
+public class AutoBase extends LinearOpMode {
+    DcMotor leftFrontMotor, rightFrontMotor, leftRearMotor, rightRearMotor,  light;
+    Servo rightWing, leftWing, arm, plow;
+    GyroSensor gyro;
+    ColorSensor color;
+    UltrasonicSensor sonic;
+
+    int heading = 0;
+    float hsvValues[] = {0,0,0};
+    final float values[] = hsvValues;
+    boolean tooFar = false;
+    //Declaration of variables
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        leftFrontMotor = hardwareMap.dcMotor.get("left_front");
+        rightFrontMotor = hardwareMap.dcMotor.get("right_front");
+        leftRearMotor = hardwareMap.dcMotor.get("left_rear");
+        rightRearMotor = hardwareMap.dcMotor.get("right_rear");
+        rightWing = hardwareMap.servo.get("right_wing");
+        leftWing = hardwareMap.servo.get("left_wing");
+        arm = hardwareMap.servo.get("arm");
+        color = hardwareMap.colorSensor.get("color");
+        gyro = hardwareMap.gyroSensor.get("gyro");
+        plow = hardwareMap.servo.get("plow");
+        sonic = hardwareMap.ultrasonicSensor.get("sonic");
+        //Hardware Map
+
+        final double UP_LEFT = 1;
+        final double UP_RIGHT = 0.925;
+        double val;
+        //Declaration of variables
+
+        //rightFrontMotor.setDirection(DcMotor.Direction.REVERSE);
+        //rightRearMotor.setDirection(DcMotor.Direction.REVERSE);
+        //Setting the right motors' directions to reverse
+
+        rightWing.setPosition(UP_RIGHT);
+        leftWing.setPosition(UP_LEFT);
+        //While the robot is initializing, set the "wings" to an up-position
+
+        gyro.calibrate();
+        // Calibrating the gyro
+        plow.setPosition(0);
+        //set the plow to its base position
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        //Resetting the encoders
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //tell the wheels to run based off the encoders
+
+        heading = gyro.getHeading();
+        //declaring a new variable called heading and setting it equal to whatever the current heading is
+
+        waitForStart();
+
+        sleep(15000);
+        //sleep/wait to make sure the gyro has had enough time to calibrate
+        while(color.blue() < 30 || color.red() < 50){
+        Color.RGBToHSV(color.red(), color.green(), color.blue(), hsvValues);
+        //declaring color values
+        telemetry.addData("48", "go forward slowly till blue || red " + color.blue() + " \nred: " + color.red());
+        //send data to the screen showing the encoder value
+
+        leftFrontMotor.setPower(0.2);
+        rightFrontMotor.setPower(-0.25);
+        leftRearMotor.setPower(0.2);
+        rightRearMotor.setPower(-0.25);
+        //The speed to go until you hit the target
+    }
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+    }
+}
