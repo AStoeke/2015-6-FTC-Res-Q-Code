@@ -1,0 +1,58 @@
+package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.Servo;
+
+/**
+ * Created by Atalanta on 12/13/2015.
+ */
+public class TestAuto extends LinearOpMode {
+    DcMotor leftFrontMotor, rightFrontMotor, leftRearMotor, rightRearMotor, arm, light;
+    Servo rightWing, leftWing, plow;                                             //Declaration of variables
+    Servo dungeon;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        leftFrontMotor = hardwareMap.dcMotor.get("left_front");
+        rightFrontMotor = hardwareMap.dcMotor.get("right_front");
+        leftRearMotor = hardwareMap.dcMotor.get("left_rear");               //**********************
+        rightRearMotor = hardwareMap.dcMotor.get("right_rear");             //Hardware Map
+        rightWing = hardwareMap.servo.get("right_wing");                     //**********************
+        leftWing = hardwareMap.servo.get("left_wing");
+        arm = hardwareMap.dcMotor.get("arm");
+        light = hardwareMap.dcMotor.get("LED");
+        dungeon = hardwareMap.servo.get("dungeon");
+        plow = hardwareMap.servo.get("plow");
+
+        arm.setMode(DcMotorController.RunMode.RESET_ENCODERS);       //Resets the encoder
+
+        rightWing.setPosition(0.925);                                       //While the robot is initializing,
+        leftWing.setPosition(1);                                            //set the "wings" to an up-position
+        arm.setPowerFloat();
+        dungeon.setPosition(0.65);
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);     //Resetting the encoders
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        waitForStart();
+        while (opModeIsActive()) {
+
+            while (leftFrontMotor.getCurrentPosition() < 1605) {
+                leftFrontMotor.setPower(1.0);   //******************************************
+                rightFrontMotor.setPower(-1.0); //The speed to go until you hit the target
+                leftRearMotor.setPower(1.0);    //******************************************
+                rightRearMotor.setPower(-1.0);
+            }
+
+            leftFrontMotor.setPower(0);   //******************************************
+            rightFrontMotor.setPower(0);  //The speed to go until you hit the target
+            leftRearMotor.setPower(0);    //******************************************
+            rightRearMotor.setPower(0);
+
+
+
+        }
+    }
+}
