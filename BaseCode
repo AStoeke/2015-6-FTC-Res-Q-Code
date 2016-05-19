@@ -1,0 +1,114 @@
+package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
+import com.qualcomm.ftcrobotcontroller.R;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.util.Range;
+
+/**
+ * Created by Atalanta on 10/4/2015.
+ */
+public class BaseCode extends OpMode {
+        DcMotor leftFrontMotor, rightFrontMotor, leftRearMotor, rightRearMotor, arm, light;
+        Servo rightWing, leftWing, plow;                                             //Declaration of variables
+        Servo dungeon;
+
+
+
+    @Override
+    public void init() {
+        leftFrontMotor = hardwareMap.dcMotor.get("left_front");
+        rightFrontMotor = hardwareMap.dcMotor.get("right_front");
+        leftRearMotor = hardwareMap.dcMotor.get("left_rear");               //**********************
+        rightRearMotor = hardwareMap.dcMotor.get("right_rear");             //Hardware Map
+        rightWing= hardwareMap.servo.get("right_wing");                     //**********************
+        leftWing= hardwareMap.servo.get("left_wing");
+        arm = hardwareMap.dcMotor.get("arm");
+        light = hardwareMap.dcMotor.get("LED");
+        dungeon = hardwareMap.servo.get("dungeon");
+        plow = hardwareMap.servo.get("plow");
+
+        arm.setChannelMode(DcMotorController.RunMode.RESET_ENCODERS);       //Resets the encoder
+
+        rightWing.setPosition(0.925);                                       //While the robot is initializing,
+        leftWing.setPosition(1);                                            //set the "wings" to an up-position
+        arm.setPowerFloat();
+        dungeon.setPosition(0.65);
+    }
+
+    @Override
+    public void loop() {
+        float x1Value = -gamepad1.left_stick_y;
+        float y1Value = gamepad1.right_stick_y;
+        float x2Value = -gamepad2.left_stick_y;
+        int div = 1;
+        final double REG_POS = 0.125;                                       //*******************************
+        final double DEPOSIT_POS = 0.65;                                    //more declaration of variables
+        final double UP_LEFT = 1;                                           //*******************************
+        final double UP_RIGHT = 0.925;
+        final double DOWN = 0.5;
+
+        x1Value = Range.clip(x1Value, -1, 1);                                 //Tell the motors they can't go past certain values
+        y1Value = Range.clip(y1Value, -1, 1);
+
+        x2Value = Range.clip(x2Value, -1, 1);                                 //Tell the motors they can't go past certain values
+
+        leftFrontMotor.setPower(x1Value / div);                              //**********************************************************************
+        rightFrontMotor.setPower(y1Value / div);                             //telling the motors they will follow the variable from the joystick
+        leftRearMotor.setPower(x1Value / div);                               //that they are assigned to
+        rightRearMotor.setPower(y1Value / div);                              //**********************************************************************
+
+        light.setPower(x2Value);
+
+        if(gamepad1.right_bumper) {
+            div = 5;
+        }
+
+        if(gamepad1.x) {
+            plow.setPosition(0.7);
+        }
+
+        if(gamepad1.a) {
+            plow.setPosition(0);
+        }
+
+        if(gamepad1.y) {                                                    //***********************************************
+            rightWing.setPosition(UP_RIGHT);                                //If the Y button is pushed, move the wings up
+            leftWing.setPosition(UP_LEFT);                                  //***********************************************
+        }
+        if(gamepad1.b) {                                                    //***********************************************
+            rightWing.setPosition(DOWN);                                    //If the B button is pushed, move the wings down
+            leftWing.setPosition(DOWN);                                     //***********************************************
+        }
+
+        if(gamepad2.y) {
+            arm.setTargetPosition(330);                                     //*************************************************************
+            arm.setMode(DcMotorController.RunMode.RUN_TO_POSITION);  //If the X button is pushed, move the arm up
+            arm.setPower(0.05);                                            //*************************************************************
+        }
+
+        if (gamepad2.b) {
+            arm.setPowerFloat();
+
+            arm.setTargetPosition(0);                                       //*************************************************************
+            arm.setMode(DcMotorController.RunMode.RUN_TO_POSITION);  //If the A button is pushed, move the arm down
+            arm.setPower(0.1);                                            //*************************************************************
+        }
+
+        if (gamepad2.x) {                                                   //*********************************************************************
+            dungeon.setPosition(DEPOSIT_POS);                               //If the right bumper is pushed, move the dungeon to deposit position
+        }                                                                   //*********************************************************************
+        if(gamepad2.a) {                                                    //*********************************************************************
+            dungeon.setPosition(REG_POS);                                   //If the left bumper is pushed, move the dungeon to regular position
+        }                                                                   //*********************************************************************
+    }
+}
