@@ -1,0 +1,138 @@
+package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
+import com.qualcomm.ftcrobotcontroller.R;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.util.Range;
+
+//Above: Importing all the different classes and individual things to be used in the program
+
+
+/**
+ * Created by Atalanta on 10/4/2015.
+ */
+public class TeleOpRed extends OpMode {
+    DcMotor leftFrontMotor, rightFrontMotor, leftRearMotor, rightRearMotor, wire, tail;
+    Servo rightWing, leftWing, plow, arm;
+    //Declaration of variables
+
+    @Override
+    public void init() {
+        //Below: declaring the names of each motor, servo, and sensors
+
+        leftFrontMotor = hardwareMap.dcMotor.get("left_front");
+        rightFrontMotor = hardwareMap.dcMotor.get("right_front");
+        leftRearMotor = hardwareMap.dcMotor.get("left_rear");
+        rightRearMotor = hardwareMap.dcMotor.get("right_rear");
+        wire = hardwareMap.dcMotor.get("wire");
+        tail = hardwareMap.dcMotor.get("tail");
+        rightWing= hardwareMap.servo.get("right_wing");
+        leftWing= hardwareMap.servo.get("left_wing");
+        arm = hardwareMap.servo.get("arm");
+        plow = hardwareMap.servo.get("plow");
+
+        rightWing.setPosition(0.925);
+        leftWing.setPosition(1);
+        //While the robot is initializing, set the "wings" to an up-position
+
+        arm.setPosition(0.25);
+        //while the robot is initializing, set the arm to an up-position
+
+        rightFrontMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightRearMotor.setDirection(DcMotor.Direction.REVERSE);
+        //Setting the right motors' directions to reverse
+    }
+
+    @Override
+    public void loop() {
+        float x1Value = -gamepad1.left_stick_y;
+        float y1Value = -gamepad1.right_stick_y;
+
+        double div = 1.2;
+        final double REG_POS = 0.5;
+        final double DEPOSIT_POS = 1;
+        final double UP_LEFT = 1;
+        final double UP_RIGHT = 0.925;
+        final double DOWN = 0.5;
+        //variable declaration
+
+        x1Value = Range.clip(x1Value, -1, 1);
+        y1Value = Range.clip(y1Value, -1, 1);
+        //make sure the joystick values don't go over 1 and under -1
+
+        if (gamepad1.right_bumper) {
+            div = 5;
+        }
+        //if the right bumper is held, change the division value to 5
+
+        leftFrontMotor.setPower(x1Value / div);
+        rightFrontMotor.setPower(y1Value / div);
+        leftRearMotor.setPower(x1Value / div);
+        rightRearMotor.setPower(y1Value / div);
+        //telling the motors they will follow the variable from the joystick that they are assigned to
+
+        if(gamepad2.right_bumper) {
+            tail.setPower(0.2);
+            //if the right bumper on the second controller is pressed, move the tail out
+        }
+        else if (gamepad2.left_bumper) {
+            tail.setPower(-0.2);
+            //if the left bumper on the second controller is pressed, move the tail in
+        }
+        else {
+            tail.setPower(0);
+            //otherwise don't move the tail
+        }
+
+        if (gamepad2.y) {
+            wire.setPower(-0.8);
+            //if the y button on the second controller is pressed, move the wire out
+        }
+        else if (gamepad2.b) {
+            wire.setPower(0.8);
+            //if the b button on the second controller is pressed, move the wire in
+        }
+        else {
+            wire.setPower(0);
+            //otherwise don't move the wire
+        }
+
+        if (gamepad1.x) {
+            plow.setPosition(0.7);
+            //If the X button is pushed, move the plow down
+        }
+
+        if (gamepad1.a) {
+            plow.setPosition(0);
+            //If the A button is pushed, move the plow up
+        }
+
+        if (gamepad1.y) {
+            rightWing.setPosition(UP_RIGHT);
+            //If the Y button is pushed, move the wing up
+        }
+        if (gamepad1.b) {
+            rightWing.setPosition(DOWN);
+            //If the B button is pushed, move the wing down
+        }
+
+        if (gamepad2.x) {
+            arm.setPosition(DEPOSIT_POS);
+            //If the X button on the second controller is pushed, move the arm to deposit position
+        }
+
+        if (gamepad2.a) {
+            arm.setPosition(REG_POS);
+            //If the A button on the second controller is pushed, move the arm to regular position
+        }
+    }
+}
