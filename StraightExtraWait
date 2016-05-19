@@ -1,0 +1,120 @@
+package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import android.graphics.Color;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.Servo;
+
+/**
+ * Created by Atalanta on 12/13/2015.
+ */
+public class StraightExtraWait extends LinearOpMode {
+    DcMotor leftFrontMotor, rightFrontMotor, leftRearMotor, rightRearMotor,  light;
+    Servo rightWing, leftWing, arm, plow;
+    GyroSensor gyro;
+    ColorSensor color;
+
+    int heading = 0;
+    float hsvValues[] = {0,0,0};
+    final float values[] = hsvValues;
+    //Declaration of variables
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        leftFrontMotor = hardwareMap.dcMotor.get("left_front");
+        rightFrontMotor = hardwareMap.dcMotor.get("right_front");
+        leftRearMotor = hardwareMap.dcMotor.get("left_rear");
+        rightRearMotor = hardwareMap.dcMotor.get("right_rear");
+        rightWing = hardwareMap.servo.get("right_wing");
+        leftWing = hardwareMap.servo.get("left_wing");
+        arm = hardwareMap.servo.get("arm");
+        color = hardwareMap.colorSensor.get("color");
+        gyro = hardwareMap.gyroSensor.get("gyro");
+        plow = hardwareMap.servo.get("plow");
+        //declaring the names of each motor, servo, and sensors
+
+        final double UP_LEFT = 1;
+        final double UP_RIGHT = 0.925;
+
+        rightFrontMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightRearMotor.setDirection(DcMotor.Direction.REVERSE);
+        //Setting the right motors directions to reverse
+
+        rightWing.setPosition(UP_RIGHT);
+        leftWing.setPosition(UP_LEFT);
+        //Move the wings to the up position
+
+        gyro.calibrate();
+        // Calibrating the gyro
+        plow.setPosition(0);
+        //Telling the plow to go to the down position
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        //Resetting the encoders
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //Tells the wheels to run using the encoders
+
+        heading = gyro.getHeading();
+        //creating a new variable and setting it equal to the gyro's current heading
+
+        waitForStart();
+
+        sleep(20000);
+
+        while(color.blue() < 32 || color.red() < 50){
+            Color.RGBToHSV(color.red(), color.green(), color.blue(), hsvValues);
+            //declaring color values
+            telemetry.addData("48","go forward slowly till blue or red " + leftFrontMotor.getCurrentPosition());
+            //send data to the screen showing the current encoder value
+
+            leftFrontMotor.setPower(0.6);
+            rightFrontMotor.setPower(0.6);
+            leftRearMotor.setPower(0.6);
+            rightRearMotor.setPower(0.6);
+            //The speed to go until you hit the target
+        }
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+        sleep(750);
+        //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        //Resetting the encoder
+
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle();
+        }
+        //to give the encoder time to reset, wait until the encoder value is zero
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //Tells the wheels to run using the encoders
+
+        while(leftFrontMotor.getCurrentPosition() < 1000){
+            //while the encoder value is less than 1000...
+            leftFrontMotor.setPower(0.3);
+            rightFrontMotor.setPower(0.3);
+            leftRearMotor.setPower(0.3);
+            rightRearMotor.setPower(0.3);
+            //go forward slowly
+        }
+
+        waitOneFullHardwareCycle();
+        //sleep/wait
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+        sleep(1500);
+        //sleep/wait
+    }
+}
