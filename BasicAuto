@@ -1,0 +1,36 @@
+package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+//import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+/**
+ * Created by Atalanta on 2/21/2016.
+ */
+public class BasicAuto extends LinearOpMode {
+    public static String color = "";
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        //
+        // put your initialization code here.
+        //
+        while (!opModeIsActive()) {
+            if (gamepad1.y == true) {
+                color = "blue";
+            }
+            if (gamepad1.b == true) {
+                color = "red";
+            }
+            telemetry.addData("44", "color opmode: " + color);
+            waitOneFullHardwareCycle();
+        }
+
+        while (opModeIsActive()) {
+            //
+            // Put your acutonomous code here.
+            //
+            waitOneFullHardwareCycle();
+        }
+
+    }
+}
