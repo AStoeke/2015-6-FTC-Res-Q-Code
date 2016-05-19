@@ -1,0 +1,311 @@
+package com.qualcomm.ftcrobotcontroller.opmodes;
+
+import android.graphics.Color;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+
+/**
+ * Created by Atalanta on 12/13/2015.
+ */
+public class CompressedAutoRed extends LinearOpMode {
+    DcMotor leftFrontMotor, rightFrontMotor, leftRearMotor, rightRearMotor,  light;
+    Servo rightWing, leftWing, arm, plow;
+    GyroSensor gyro;
+    ColorSensor color;
+    UltrasonicSensor sonic;
+
+    int heading = 0;
+    float hsvValues[] = {0,0,0};
+    final float values[] = hsvValues;
+    //Declaration of variables
+
+    public void forward(int var) {
+        int time = var;
+
+        while(leftFrontMotor.getCurrentPosition() < time) {
+            telemetry.addData("05", "forward " + leftFrontMotor.getCurrentPosition());
+
+            leftFrontMotor.setPower(0.3);
+            rightFrontMotor.setPower(0.3);
+            leftRearMotor.setPower(0.3);
+            rightRearMotor.setPower(0.3);
+        }
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+    }
+
+    public void colorForward(int var) {
+        Color.RGBToHSV(color.red(), color.green(), color.blue(), hsvValues);
+        //declaring color values
+
+        int col = var;
+
+        while(color.red() < col) {
+            telemetry.addData("05","forward " + color.red());
+
+            leftFrontMotor.setPower(0.3);
+            rightFrontMotor.setPower(0.3);
+            leftRearMotor.setPower(0.3);
+            rightRearMotor.setPower(0.3);
+        }
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+    }
+
+    public void colorForwardWhite(int green, int red, int blue) {
+        Color.RGBToHSV(color.red(), color.green(), color.blue(), hsvValues);
+        //declaring color values
+
+        int g = green;
+        int r = red;
+        int b = blue;
+
+        while(color.green() < g && color.red() < r && color.blue() < b) {
+            telemetry.addData("48","current green val " + color.green() + "\ncurrent red val " + color.red() + "\ncurrent blue val " + color.blue());
+
+            leftFrontMotor.setPower(0.1);
+            rightFrontMotor.setPower(0.1);
+            leftRearMotor.setPower(0.1);
+            rightRearMotor.setPower(0.1);
+        }
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+    }
+
+    public void turnRight(int var) {
+        int time = var;
+
+        while(leftFrontMotor.getCurrentPosition() < time) {
+            telemetry.addData("05", "turn right " + leftFrontMotor.getCurrentPosition());
+
+            leftFrontMotor.setPower(0.3);
+            rightFrontMotor.setPower(-0.3);
+            leftRearMotor.setPower(0.3);
+            rightRearMotor.setPower(-0.3);
+        }
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+    }
+
+    public void turnLeft(int var) {
+        int time = var;
+
+        while(leftFrontMotor.getCurrentPosition() > time) {
+            telemetry.addData("05", "turn left " + leftFrontMotor.getCurrentPosition());
+
+            leftFrontMotor.setPower(-0.3);
+            rightFrontMotor.setPower(0.3);
+            leftRearMotor.setPower(-0.3);
+            rightRearMotor.setPower(0.3);
+        }
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+    }
+
+    public void reverse(int var) {
+        int time = var;
+
+        while(leftFrontMotor.getCurrentPosition() > time) {
+            telemetry.addData("05", "reverse " + leftFrontMotor.getCurrentPosition());
+
+            leftFrontMotor.setPower(-0.3);
+            rightFrontMotor.setPower(-0.3);
+            leftRearMotor.setPower(-0.3);
+            rightRearMotor.setPower(-0.3);
+        }
+
+        leftFrontMotor.setPower(0);
+        rightFrontMotor.setPower(0);
+        leftRearMotor.setPower(0);
+        rightRearMotor.setPower(0);
+        //stop the motors
+    }
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        leftFrontMotor = hardwareMap.dcMotor.get("left_front");
+        rightFrontMotor = hardwareMap.dcMotor.get("right_front");
+        leftRearMotor = hardwareMap.dcMotor.get("left_rear");
+        rightRearMotor = hardwareMap.dcMotor.get("right_rear");
+        rightWing = hardwareMap.servo.get("right_wing");
+        leftWing = hardwareMap.servo.get("left_wing");
+        arm = hardwareMap.servo.get("arm");
+        color = hardwareMap.colorSensor.get("color");
+        gyro = hardwareMap.gyroSensor.get("gyro");
+        plow = hardwareMap.servo.get("plow");
+        sonic = hardwareMap.ultrasonicSensor.get("sonic");
+        //Hardware Map
+
+        final double UP_LEFT = 1;
+        final double UP_RIGHT = 0.925;
+        double val;
+        CompressedAutoRed robot = new CompressedAutoRed();
+        //Declaration of variables
+
+        rightFrontMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightRearMotor.setDirection(DcMotor.Direction.REVERSE);
+        //Setting the right motors' directions to reverse
+
+        rightWing.setPosition(UP_RIGHT);
+        leftWing.setPosition(UP_LEFT);
+        //While the robot is initializing, set the "wings" to an up-position
+
+        gyro.calibrate();
+        // Calibrating the gyro
+        plow.setPosition(0);
+        //set the plow to its base position
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);
+        //Resetting the encoders
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //tell the wheels to run based off the encoders
+
+        heading = gyro.getHeading();
+        //declaring a new variable called heading and setting it equal to whatever the current heading is
+
+        waitForStart();
+
+        sleep(1500);
+        //sleep/wait to make sure the gyro has had enough time to calibrate
+
+        robot.colorForward(50); //going forward till the color sensor hits red value of over 50
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS); //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //resetting the encoders so they'll be ready to use again
+
+        robot.forward(550); //going forward a bit in red for 550 encoder counts
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS); //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //resetting the encoders so they'll be ready to use again
+
+        robot.turnRight(650); //turning right to face the white tape
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //resetting the encoders so they'll be ready to use again
+
+        robot.colorForwardWhite(58, 85, 75); //go forward until you hit white tape
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        waitOneFullHardwareCycle();
+        //resetting the encoders so they'll be ready to use again
+
+        robot.forward(200); //go forward a little bit
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        waitOneFullHardwareCycle();
+        //resetting the encoders so they'll be ready to use again
+
+        robot.forward(900); //move forward to push debris out of the way
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //resetting the encoders so they'll be ready to use again
+
+        robot.reverse(-500); //reverse to get back to in front of the beacon/button
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //resetting the encoders so they'll be ready to use again
+
+        robot.turnLeft(-1300); //turning to the bucket
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //resetting the encoders so they'll be ready to use again
+
+        robot.forward(900); //going to the bucket itself
+        sleep(1500); //sleep/wait
+
+        leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+        while(leftFrontMotor.getCurrentPosition() != 0) {
+            waitOneFullHardwareCycle(); }
+        leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //resetting the encoders so they'll be ready to use again
+
+        telemetry.addData("05", "depositing " + leftFrontMotor.getCurrentPosition());
+
+        if(!(leftFrontMotor.getCurrentPosition() > 1500)) {
+            arm.setPosition(1);
+            sleep(1500);
+
+            leftFrontMotor.setMode(DcMotorController.RunMode.RESET_ENCODERS);   //Resetting the encoder
+            while(leftFrontMotor.getCurrentPosition() != 0) {
+                waitOneFullHardwareCycle();}
+            leftFrontMotor.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+
+            while(leftFrontMotor.getCurrentPosition() < 175){
+                telemetry.addData("05", "making sure the climbers are IN ;) " + leftFrontMotor.getCurrentPosition());
+                leftFrontMotor.setPower(0.1);   //******************************************
+                rightFrontMotor.setPower(0.1);  //The speed to go until you hit the target
+                leftRearMotor.setPower(0.1);    //******************************************
+                rightRearMotor.setPower(0.1);
+            }
+
+            waitOneFullHardwareCycle();
+
+            leftFrontMotor.setPower(0);   //******************************************
+            rightFrontMotor.setPower(0);  //The speed to go until you hit the target
+            leftRearMotor.setPower(0);    //******************************************
+            rightRearMotor.setPower(0);
+            sleep(1500);
+
+            arm.setPosition(0.5);
+        }
+    }
+}
